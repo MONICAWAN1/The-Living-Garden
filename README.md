@@ -16,11 +16,11 @@ All spirits live together in a **shared garden**, rendered in **p5.js** with bre
 
 ## Features
 
-* 🧬 **AI-generated spirit profiles** via OpenRouter (`gpt-4o-mini`)
-* 🌈 **Dynamic visual ecosystem** (plants sway, clouds drift, animals float)
-* 💫 **Shared real-time garden** — everyone’s spirits coexist and evolve
-* 🌿 **Activity awareness** — idle users’ spirits “sleep”; active users’ spirits glow
-* 🎨 **Pre-generated Midjourney assets** for visuals (no live image calls)
+* **AI-generated spirit profiles** via OpenRouter (`gpt-4o-mini`)
+* **Dynamic visual ecosystem** (plants sway, clouds drift, animals float)
+* **Shared real-time garden** — everyone’s spirits coexist and evolve
+* **Activity awareness** — idle users’ spirits “sleep”; active users’ spirits glow
+* **Midjourney-generated assets** for visuals
 
 ---
 
@@ -53,7 +53,7 @@ npm install
 pnpm install
 ```
 
-### 3️⃣ Create a `.env.local` file in `/web`
+### 3️⃣ Create a `.env.local` file
 
 ```bash
 VITE_OPENROUTER_KEY=sk-or-v1-xxxxxxxxxxxxxxxxxxxx

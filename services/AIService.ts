@@ -7,15 +7,14 @@ const client = new OpenAI({
   dangerouslyAllowBrowser: true,
 });
 
-// 生成 Spirit Profile
+// Generate Spirit Profile
 export const generateSpiritProfile = async (
   answers: { question: string; answer: string }[]
 ): Promise<Omit<Spirit, "id" | "activityState">> => {
   if (!import.meta.env.VITE_OPENROUTER_KEY) {
-    throw new Error("OPENAI_API_KEY not found in environment");
+    throw new Error("openai api key not found in environment");
   }
 
-  // 构造 prompt
   const prompt = `
 You are a nature-spirit generator. Based on a user's answers to abstract questions, generate a Spirit profile as JSON.
 
@@ -41,14 +40,14 @@ Return only JSON with no explanations.
 
   try {
     const response = await client.chat.completions.create({
-      model: "gpt-4o-mini", // 可换成 claude-3.5-sonnet / mixtral 等
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: "You generate JSON spirit profiles for a digital garden." },
         { role: "user", content: prompt },
       ],
       temperature: 0.7,
       max_tokens: 500,
-      response_format: { type: "json_object" }, // ✅ 强制返回 JSON
+      response_format: { type: "json_object" },
     });
 
     const spiritData = response.choices[0].message?.content;
@@ -65,7 +64,7 @@ Return only JSON with no explanations.
 
   } catch (error) {
     console.error("Error generating spirit profile:", error);
-    // Fallback 默认值
+    // Fallback
     return {
       archetype: "plant" as Archetype,
       traits: ["resilient", "calm"],
