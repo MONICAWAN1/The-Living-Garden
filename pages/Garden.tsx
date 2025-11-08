@@ -3,12 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import type p5 from 'p5';
 
 import { socket } from '../socket';
-import { WorldState, Spirit, ActivityState } from '../types';
+import { WorldState, Spirit, Archetype, ActivityState } from '../types';
 import { ActivityMonitor } from '../lib/activityMonitor';
 import { renderAnimal } from '../render/renderAnimal';
 import { renderCloud } from '../render/renderCloud';
 import { renderPlant } from '../render/renderPlant';
 import { getAverageColor } from '../lib/colormaps';
+
+// Input coming from your quiz/AI step
+export interface SpiritParameters {
+  Type: 'Plant' | 'Animal' | 'Cloud';
+  Keywords: string;        // e.g., "vibrant, curious"
+  ColorCode: string;       // e.g., "#FF6347"
+  SizeParam: number;       // 1..100
+  MotionSpeed: number;     // 0..1+ (your motion intensity)
+  isAwake: boolean;        // maps to ActivityState
+}
 
 
 const P5Sketch: React.FC<{ world: WorldState }> = ({ world }) => {
@@ -27,6 +37,9 @@ const P5Sketch: React.FC<{ world: WorldState }> = ({ world }) => {
                 if (sketchRef.current) {
                     p.createCanvas(sketchRef.current.offsetWidth, sketchRef.current.offsetHeight).parent(sketchRef.current);
                     p.frameRate(30);
+                    p.imageMode(p.CENTER);   
+                    p.pixelDensity(2);       
+                    p.smooth();
                 }
             };
 
@@ -112,13 +125,32 @@ const Garden: React.FC = () => {
             return;
         }
 
-        const spirit: Spirit = JSON.parse(profile);
+        const base = JSON.parse(profile) as Omit<Spirit, 'id' | 'activityState'>;
+        console.log('[Garden] Loaded AI profile from localStorage:', base);
+
+        // Stable id across sessions
+        const id = localStorage.getItem('spiritId') ?? `spirit_${crypto.randomUUID()}`;
+        localStorage.setItem('spiritId', id);
+
+        // Construct a full Spirit using the AI data
+        const spirit: Spirit = {
+        id,
+        activityState: 'active', // start as active (can be updated by ActivityMonitor)
+        ...base,
+        };
+
         setSpiritId(spirit.id);
 
         socket.connect();
-        socket.emit('spirit:upsert', spirit);
+                
+        const onConnect = () => {
+            console.log('[Garden] Socket connected, upserting spirit', spirit);
+            socket.emit('spirit:upsert', spirit);
+        };
+
 
         const onWorldUpdate = (newWorldState: WorldState) => {
+            console.log('[Garden] world:update', newWorldState);
             setWorldState(newWorldState);
         };
         socket.on('world:update', onWorldUpdate);
